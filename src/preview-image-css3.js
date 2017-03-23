@@ -6,7 +6,7 @@ import Transform from 'css3transform';
 import * as util from './util';
 import To from './to';
 import * as BaseMath from './base-math'
-import './loading.scss';
+import './loading-style';
 
 // 基础配置选项
 const OPTIONS_DEFAULT = {

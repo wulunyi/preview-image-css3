@@ -3,11 +3,11 @@
  */
 
 import webpack from 'webpack';
-import path    from 'path';
+import path from 'path';
 
 // 目录变量
-let SRC_PATH  = path.resolve('src');
-let LIB_PATH  = path.resolve('lib');
+let SRC_PATH = path.resolve('src');
+let LIB_PATH = path.resolve('lib');
 
 module.exports = {
 	entry: {
@@ -16,9 +16,9 @@ module.exports = {
 
 	output: {
 		filename: 'preview-image-css3.js',
-		path    : LIB_PATH,
-		library : 'PreviewImageCss',
-		libraryTarget :  'umd',
+		path: LIB_PATH,
+		library: 'PreviewImageCss',
+		libraryTarget: 'umd',
 		umdNamedDefine: true
 	},
 
@@ -29,45 +29,47 @@ module.exports = {
 			amd: "alloyfinger",
 			root: "alloyfinger"
 		},
-    "css3transform":{
-      commonjs: "css3transform",
+		"css3transform": {
+			commonjs: "css3transform",
 			commonjs2: "css3transform",
 			amd: "css3transform",
 			root: "css3transform"
-    }
+		}
 	},
 
 	resolve: {
 		extensions: ['.js'],
-		modules   : ['node_modules', SRC_PATH],
+		modules: ['node_modules', SRC_PATH],
 	},
 
 	module: {
-		rules: [
-			{
+		rules: [{
 				test: /\.js$/,
 				include: SRC_PATH,
 				exclude: path.resolve('node_modules'),
-				use: [
-					{loader: 'babel-loader'}
-				]
+				use: [{
+					loader: 'babel-loader'
+				}]
 			},
 			{
 				test: /\.scss$/,
 				include: SRC_PATH,
 				exclude: path.resolve('node_modules'),
-				use: [
-					{loader: 'style-loader'},
-					{loader: 'css-loader'},
-					{loader: 'postcss-loader'},
+				use: [{
+						loader: 'style-loader'
+					},
 					{
-						loader: 'px2rem-loader',
-						options:{
-							remUnit: 75,
-							remPrecision: 8
+						loader: 'css-loader',
+						options: {
+							sourceMap: false
 						}
 					},
-					{loader: 'sass-loader'}
+					{
+						loader: 'sass-loader',
+						options: {
+							sourceMap: false
+						}
+					}
 				]
 			}
 		]

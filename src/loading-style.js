@@ -1,3 +1,4 @@
+let styleStr = `
 .loader {
   position: absolute;
   left: 0;
@@ -91,3 +92,8 @@
 
   color: #ffffff;
 }
+`;
+
+var style = document.createElement('style');
+style.innerHTML = styleStr;
+document.head.appendChild(style);

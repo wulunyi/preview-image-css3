@@ -21,37 +21,18 @@ const OPTIONS_DEFAULT = {
 export default class PreviewImage {
   constructor(element, options) {
     if (util.isDom(element)) {
-      // 陪你选项
+      // 配置选项
       this.options = options || {};
       // 容器
       this.context = element;
       // 缓存容器几何信息
       this.conBox = element.getBoundingClientRect();
+      // 函数调用栈
+      this.callList = [];
 
       // 设置容器样式
       util.setStyle(this.context, {
         position: 'relative'
-      });
-
-      // loading 动画
-      this.loading('start');
-
-      // 拉取图片
-      util.pullImage(this.options.imageSrc).after((err, imgDom) => {
-        // loading 动画结束
-        this.loading('end');
-
-        if (err) {
-          this.err();
-
-          return console.warn(err);
-        }
-
-        // 图片元素
-        this.element = imgDom;
-
-        // 开始执行
-        this.start();
       });
     } else {
       console.warn('The element isRequierd');
@@ -84,13 +65,36 @@ export default class PreviewImage {
   }
 
   start() {
-    // 调用时图片可能不存在
-    if (!this.element) {
-      return this.callStart = true;
+    // loading 动画
+    this.loading('start');
+
+    // 拉取图片
+    util.pullImage(this.options.imageSrc).after((err, imgDom) => {
+      // loading 动画结束
+      this.loading('end');
+
+      if (err) {
+        this.err();
+
+        return console.warn(err);
+      }
+
+      // 开始执行
+      this.init(imgDom);
+
+      while (this.callList.length) {
+        this.callList.shift()();
+      }
+    });
+  }
+
+  init(imgDom) {
+    if(!imgDom){
+      return console.warn('miss aruments');
     }
 
     // 计算图片形状 1 为横图 －1 为竖图
-    let s = BaseMath.judgeShape(this.element.width, this.element.height);
+    let s = BaseMath.judgeShape(imgDom.width, imgDom.height);
 
     // 计算初始显示宽高
     let {
@@ -99,23 +103,25 @@ export default class PreviewImage {
     } = BaseMath.transformWH(
       this.context.clientWidth,
       this.context.clientHeight,
-      this.element.width,
-      this.element.height,
+      imgDom.width,
+      imgDom.height,
       s
     );
 
     // 计算定位位置
-    let topPx = s === -1 ? 0 : window.innerHeight / 2 - h / 2;
-    let leftPx = s === 1 ? 0 : window.innerWidth / 2 - w / 2;
+    let topPx = s === -1 ? 0 : this.context.clientHeight / 2 - h / 2;
+    let leftPx = s === 1 ? 0 : this.context.clientWidth / 2 - w / 2;
 
     // 设置元素样式
-    util.setStyle(this.element, {
+    util.setStyle(imgDom, {
       position: 'absolute',
       width: w + 'px',
       height: h + 'px',
       top: topPx + 'px',
       left: leftPx + 'px'
     });
+
+    this.element = imgDom;
 
     // 缓存元素几何信息
     this.elBox = this.element.getBoundingClientRect();
@@ -144,8 +150,8 @@ export default class PreviewImage {
     }
   }
 
-  err(){
-    if(!this.errDom){
+  err() {
+    if (!this.errDom) {
       this.errDom = document.createElement('p');
       this.errDom.className = 'pr__load--err';
       this.errDom.innerHTML = '图片加载失败'
@@ -155,6 +161,18 @@ export default class PreviewImage {
   }
 
   bind() {
+    if (!this.element) {
+      this.callList.push(() => {
+        this.bind()
+      });
+
+      return;
+    }
+
+    if (this.gesture) {
+      this.unbind();
+    }
+
     let el = this.element;
     let minR = this.options.minZoom;
     let maxR = this.options.maxZoom;
@@ -248,7 +266,7 @@ export default class PreviewImage {
 
         let r = _this.options.doubleZoom;
         let middleR = (minR + r) / 2;
-        let time = 200;
+        let time = 400;
 
         if (el.scaleX > middleR) {
           new To(el, "scaleX", minR, time, ease);
@@ -278,6 +296,14 @@ export default class PreviewImage {
   }
 
   unbind() {
+    if (!this.element) {
+      this.callList.push(() => {
+        this.unbind()
+      });
+
+      return;
+    }
+
     this.gesture = this.gesture.destroy();
   }
 }

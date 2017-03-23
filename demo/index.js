@@ -16,3 +16,5 @@ let previewImage = new PreviewImage(rootDom, {
 });
 
 previewImage.start();
+
+window.previewImage = previewImage;

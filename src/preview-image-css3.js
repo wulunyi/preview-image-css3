@@ -306,4 +306,14 @@ export default class PreviewImage {
 
     this.gesture = this.gesture.destroy();
   }
+
+  reset(){
+    if(this.element){
+      this.element.translateX = 0;
+      this.element.translateY = 0;
+
+      this.element.scaleX = this.options.minZoom;
+      this.element.scaleY = this.options.minZoom;
+    }
+  }
 }

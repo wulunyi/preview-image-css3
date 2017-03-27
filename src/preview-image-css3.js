@@ -19,11 +19,16 @@ const OPTIONS_DEFAULT = {
 };
 
 export default class PreviewImage {
+  /**
+   * @description 构造函数
+   * @param {Object} element 
+   * @param {Object} options 
+   */
   constructor(element, options) {
     if (util.isDom(element)) {
       // 配置选项
-      this.options = options || {};
-      // 容器
+      this.options = typeof options === 'object' ? options : {};
+      // 缓存容器
       this.context = element;
       // 缓存容器几何信息
       this.conBox = element.getBoundingClientRect();
@@ -34,18 +39,31 @@ export default class PreviewImage {
       util.setStyle(this.context, {
         position: 'relative'
       });
+
     } else {
       console.warn('The element isRequierd');
     }
   }
 
+  /**
+   * @description 获取配置文件
+   */
   get options() {
     return this._options;
   }
 
+  /**
+   * @description 设置配置文件
+   * @param {Object} options
+   */
   set options(options) {
-    // 请用兼容写法
-    this._options = Object.assign(OPTIONS_DEFAULT, options);
+    this._options = OPTIONS_DEFAULT;
+
+    for (let key in options) {
+      if (Object.prototype.hasOwnProperty.call(options, key)) {
+        this._options[key] = options[key];
+      }
+    }
   }
 
   get element() {
@@ -53,7 +71,6 @@ export default class PreviewImage {
   }
 
   set element(element) {
-    // 如果存在将不错处理
     if (this._element) {
       return;
     }
@@ -66,21 +83,21 @@ export default class PreviewImage {
 
   start() {
     // loading 动画
-    this.loading('start');
+    this._loading('start');
 
     // 拉取图片
     util.pullImage(this.options.imageSrc).after((err, imgDom) => {
       // loading 动画结束
-      this.loading('end');
+      this._loading('end');
 
       if (err) {
-        this.err();
+        this._err();
 
         return console.warn(err);
       }
 
       // 开始执行
-      this.init(imgDom);
+      this._init(imgDom);
 
       while (this.callList.length) {
         this.callList.shift()();
@@ -88,8 +105,8 @@ export default class PreviewImage {
     });
   }
 
-  init(imgDom) {
-    if(!imgDom){
+  _init(imgDom) {
+    if (!imgDom) {
       return console.warn('miss aruments');
     }
 
@@ -135,7 +152,7 @@ export default class PreviewImage {
     this.bind();
   }
 
-  loading(comand) {
+  _loading(comand) {
     if (comand === 'start') {
       if (!this.loadingDom) {
         this.loadingDom = document.createElement('div');
@@ -150,7 +167,7 @@ export default class PreviewImage {
     }
   }
 
-  err() {
+  _err() {
     if (!this.errDom) {
       this.errDom = document.createElement('p');
       this.errDom.className = 'pr__load--err';
@@ -307,8 +324,8 @@ export default class PreviewImage {
     this.gesture = this.gesture.destroy();
   }
 
-  reset(){
-    if(this.element){
+  reset() {
+    if (this.element) {
       this.element.translateX = 0;
       this.element.translateY = 0;
 

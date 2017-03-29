@@ -62,7 +62,7 @@ function calculagteRange(inS, outS, r){
  * @param {*} inS 变换图形尺寸宽或高
  * @param {*} outS 容器尺寸宽或高
  * @param {*} sp 初始绘制位置相对于容器坐标系
- * @param {*} dp 便宜量
+ * @param {*} dp 偏移量
  * @param {*} r 缩放量
  */
 function checkPlace(inS, outS, sp, dp, r){

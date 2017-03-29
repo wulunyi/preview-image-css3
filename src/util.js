@@ -39,25 +39,32 @@ function pullImage(src) {
   let imgDom = document.createElement('img');
 
   imgDom.addEventListener('load', (ev) => {
-    pullImage.AFTER_HOOK && pullImage.AFTER_HOOK(null, imgDom);
+    this.AFTER_HOOK && this.AFTER_HOOK(null, imgDom);
 
-    pullImage.AFTER_HOOK = null;
+    this.AFTER_HOOK = null;
   });
 
   imgDom.addEventListener('error', (ev) => {
     let err = new Error('图片加载失败');
 
-    pullImage.AFTER_HOOK && pullImage.AFTER_HOOK(err, imgDom);
-    pullImage.AFTER_HOOK = null;
+    this.AFTER_HOOK && this.AFTER_HOOK(err, imgDom);
+    this.AFTER_HOOK = null;
   });
 
   imgDom.src = src;
 
-  return pullImage;
+  // 从缓存中取图片的时候
+  if (imgDom.complete) {
+    this.AFTER_HOOK && this.AFTER_HOOK(null, imgDom);
+
+    this.AFTER_HOOK = null;
+  }
+
+  return this;
 }
 
-pullImage.after = function (fn) {
-  pullImage.AFTER_HOOK = fn;
+pullImage.prototype.after = function (fn) {
+  this.AFTER_HOOK = fn;
 }
 
 /**
@@ -66,7 +73,7 @@ pullImage.after = function (fn) {
  * @param {*} style 
  * @param {*} child 
  */
-function createElement(tag, style, child){
+function createElement(tag, style, child) {
   let dom = document.createElement(tag);
   style && setStyle(dom, style);
   child && isDom(child) && dom.appendChild(child);

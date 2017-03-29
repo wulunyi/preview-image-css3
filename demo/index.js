@@ -7,14 +7,10 @@ let rootDom = document.getElementsByClassName('app')[0];
 
 let previewImage = new PreviewImage(rootDom, {
   imageSrc: img, // 图片地址
-  rotatable: false, // 是否开启旋转
   doubleZoom: 2, // 双击缩放
   maxZoom: 4, // 最大缩放
   minZoom: 1, // 最小缩放
-  angled: 0, // 初始旋转角度
   softX: true // 边界是否开启过渡动画
 });
 
 previewImage.start();
-
-window.previewImage = previewImage;

@@ -1,6 +1,6 @@
 {
   "name": "preview-image-css3",
-  "version": "1.0.5",
+  "version": "1.1.8",
   "description": "",
   "main": "./lib/preview-image-css3.js",
   "scripts": {

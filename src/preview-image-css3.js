@@ -8,14 +8,8 @@ import To from './to';
 import * as BaseMath from './base-math'
 import './loading-style';
 
-// 基础配置选项
-const OPTIONS_DEFAULT = {
-  imageSrc: '', // 图片地址
-  doubleZoom: 2, // 双击
-  maxZoom: 4, // 最大缩放
-  minZoom: 1, // 最小缩放
-  softX: true, // x 轴是否开启过渡动画
-  softY: true // y 轴是否开启过渡动画
+export {
+  util
 };
 
 export default class PreviewImage {
@@ -37,8 +31,10 @@ export default class PreviewImage {
 
       // 设置容器样式
       util.setStyle(this.context, {
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
       });
+
 
     } else {
       console.warn('The element isRequierd');
@@ -57,7 +53,14 @@ export default class PreviewImage {
    * @param {Object} options
    */
   set options(options) {
-    this._options = OPTIONS_DEFAULT;
+    this._options = {
+      imageSrc: '', // 图片地址
+      doubleZoom: 2, // 双击
+      maxZoom: 4, // 最大缩放
+      minZoom: 1, // 最小缩放
+      softX: true, // x 轴是否开启过渡动画
+      softY: true // y 轴是否开启过渡动画
+    };
 
     for (let key in options) {
       if (Object.prototype.hasOwnProperty.call(options, key)) {
@@ -82,11 +85,17 @@ export default class PreviewImage {
   }
 
   start() {
+    if(this.element){
+      this.bind();
+
+      return;
+    }
+    
     // loading 动画
     this._loading('start');
 
     // 拉取图片
-    util.pullImage(this.options.imageSrc).after((err, imgDom) => {
+    (new util.pullImage(this.options.imageSrc)).after((err, imgDom) => {
       // loading 动画结束
       this._loading('end');
 
@@ -237,21 +246,29 @@ export default class PreviewImage {
 
         if (softX) {
           el.translateX += evt.deltaX;
+          _this.moveX = true;
         } else {
           let mx = BaseMath.checkPlace(elBox.width, conBox.width, leftPx, el.translateX + evt.deltaX, el.scaleX);
 
           if (mx === false) {
             el.translateX += evt.deltaX;
+            _this.moveX = true;
+          }else{
+            _this.moveX = false;
           }
         }
 
         if (softY) {
           el.translateY += evt.deltaY;
+          _this.moveY = true;
         } else {
-          let my = BaseMath.checkPlace(elBox.height, conBox.height, topPx, el.translateY, el.scaleY);
+          let my = BaseMath.checkPlace(elBox.height, conBox.height, topPx, el.translateY + evt.deltaY, el.scaleY);
 
           if (my === false) {
             el.translateY += evt.deltaY;
+            _this.moveY = true;
+          }else{
+            _this.moveY = false;
           }
         }
 
@@ -321,16 +338,21 @@ export default class PreviewImage {
       return;
     }
 
-    this.gesture = this.gesture.destroy();
+    this.gesture = this.gesture && this.gesture.destroy();
   }
 
-  reset() {
-    if (this.element) {
-      this.element.translateX = 0;
-      this.element.translateY = 0;
+  reset(t) {
+    let time = t || 0;
+    let el = this.element;
+    let ease = util.ease;
 
-      this.element.scaleX = this.options.minZoom;
-      this.element.scaleY = this.options.minZoom;
+    if (this.element) {
+      // 缩放
+      new To(el, "scaleX", this.options.minZoom, time, ease);
+      new To(el, "scaleY", this.options.minZoom, time, ease);
+      // 移动
+      new To(el, "translateX", 0, time, ease);
+      new To(el, "translateY", 0, time, ease);
     }
   }
 }
